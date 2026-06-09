@@ -226,6 +226,75 @@ Les deux doivent retourner `HTTP/1.1 200 OK` dans la première ligne de la répo
 
 ---
 
+## Modifier la page web selon le port
+
+### Même contenu sur les deux ports
+
+Si les deux VirtualHosts pointent vers le même `DocumentRoot`, toute modification du fichier sera visible sur les deux ports en même temps. C'est le comportement par défaut.
+
+### Contenu différent par port
+
+Si tu veux que chaque port serve une page différente, change le `DocumentRoot` dans le bloc `<VirtualHost *:8080>` :
+
+```apache
+<VirtualHost *:8080>
+    ServerName monsite.local
+    DocumentRoot /var/www/monsite-8080
+
+    <Directory /var/www/monsite-8080>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+Puis crée le dossier :
+
+```bash
+sudo mkdir -p /var/www/monsite-8080
+sudo chown -R $USER:$USER /var/www/monsite-8080
+```
+
+---
+
+## Garder un seul port actif
+
+Un fichier `.conf` par site, pas par port — c'est la convention Apache. Si tu veux que ton site ne réponde que sur le port 8080 :
+
+### 1. Supprimer le bloc port 80 de monsite.conf
+
+Édite `monsite.conf` et supprime le bloc `<VirtualHost *:80>`, garde uniquement `<VirtualHost *:8080>`.
+
+### 2. Désactiver le site par défaut
+
+```bash
+sudo a2dissite 000-default.conf
+```
+
+Sans ça, la page par défaut d'Apache continuerait à répondre sur le port 80.
+
+### 3. Redémarrer
+
+```bash
+sudo apache2ctl configtest
+sudo systemctl restart apache2
+```
+
+Ton site sera accessible uniquement sur `http://localhost:8080`.
+
+### Conventions : quel port choisir ?
+
+| Port | Usage |
+| --- | --- |
+| 80 | HTTP standard — navigateurs l'utilisent par défaut |
+| 443 | HTTPS standard |
+| 8080 | Développement et tests — port alternatif courant |
+
+En **production**, on reste sur le port 80 ou 443 — les utilisateurs n'ont pas à taper le port dans l'URL. En **développement**, le port 8080 est tout à fait valide.
+
+---
+
 ## Récap des commandes de configuration
 
 | Action | Commande |
