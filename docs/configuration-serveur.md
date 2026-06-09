@@ -69,7 +69,15 @@ sudo a2ensite monsite.conf
 sudo a2dissite 000-default.conf
 ```
 
-### 5. Tester la configuration
+### 5. Recharger Apache pour activer le site
+
+Après `a2ensite`, Apache te demande de recharger :
+
+```bash
+sudo systemctl reload apache2
+```
+
+### 6. Tester la configuration
 
 ```bash
 sudo apache2ctl configtest
@@ -77,7 +85,21 @@ sudo apache2ctl configtest
 
 Tu dois voir `Syntax OK` avant de redémarrer.
 
-### 6. Redémarrer Apache
+#### Avertissement AH00558 (sans danger)
+
+Si tu vois ce message :
+
+```text
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name
+```
+
+Apache ne trouve pas de `ServerName` global. Pour le supprimer :
+
+```bash
+echo "ServerName localhost" | sudo tee -a /etc/apache2/apache2.conf
+```
+
+### 7. Redémarrer Apache
 
 ```bash
 sudo systemctl restart apache2
@@ -99,38 +121,108 @@ sudo systemctl restart apache2
 > `a2enmod` = active un module
 > `a2dismod` = désactive un module
 
+Après chaque activation, Apache demande de redémarrer pour appliquer :
+
+```bash
+sudo systemctl restart apache2
+```
+
+### mod_rewrite
+
+Permet de réécrire les URLs (ex. `/produit/42` au lieu de `/index.php?id=42`). Utilisé par la plupart des CMS (WordPress, Laravel…).
+
+```bash
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+```
+
+### mod_ssl
+
+Active le support HTTPS. Apache active automatiquement ses dépendances (`socache_shmcb`, `mime`) si elles ne le sont pas déjà.
+
+```bash
+sudo a2enmod ssl
+sudo systemctl restart apache2
+```
+
+> Une fois le module activé, il faut encore configurer un certificat SSL pour utiliser le HTTPS. Voir `/usr/share/doc/apache2/README.Debian.gz` pour créer un certificat auto-signé.
+
 ---
 
 ## Configurer les ports d'écoute
 
-Le fichier `/etc/apache2/ports.conf` définit sur quels ports Apache écoute :
+Les ports sont configurés dans **deux endroits** qui doivent être cohérents.
+
+### 1. `/etc/apache2/ports.conf` — déclarer les ports d'écoute
+
+Ce fichier dit à Apache sur quels ports il doit écouter :
 
 ```apache
 Listen 80
 Listen 8080
 ```
 
-Pour ajouter un port, ajoute une ligne `Listen` et redémarre Apache.
+Tu l'édites avec :
 
----
+```bash
+sudo nano /etc/apache2/ports.conf
+```
 
-## Exemple : servir sur un port personnalisé
+![alt text](../images/portsConfig.png)
 
-Dans `/etc/apache2/sites-available/monsite.conf` :
+### 2. Le VirtualHost — associer un port à un site
+
+Dans `/etc/apache2/sites-available/monsite.conf`, la première ligne dit sur quel port ce site répond :
 
 ```apache
 <VirtualHost *:8080>
-    ServerName localhost
-    DocumentRoot /var/www/monsite
-    ...
-</VirtualHost>
 ```
 
-Et dans `ports.conf` :
+> `*` = toutes les interfaces réseau, `8080` = le port
 
-```apache
-Listen 8080
+### En pratique, pour ajouter un port
+
+```bash
+# 1. Ajouter le port dans ports.conf
+sudo nano /etc/apache2/ports.conf
+# → ajouter : Listen 8080
+
+# 2. Mettre à jour le VirtualHost
+sudo nano /etc/apache2/sites-available/monsite.conf
+# → changer <VirtualHost *:80> en <VirtualHost *:8080>
+
+# 3. Tester et redémarrer
+sudo apache2ctl configtest
+sudo systemctl restart apache2
 ```
+
+> Si tu déclares `Listen 8080` mais que ton VirtualHost reste sur `*:80`, le port 8080 sera ouvert mais aucun site n'y répondra.
+
+![alt text](../images/configVirtualHost.png)
+
+---
+
+## Vérifier que tout fonctionne
+
+### Dans le navigateur
+
+Ouvre les deux URLs et vérifie qu'elles affichent la même page :
+
+```text
+http://localhost
+http://localhost:8080
+```
+
+### Dans le terminal
+
+```bash
+curl -I http://localhost
+curl -I http://localhost:8080
+```
+
+Les deux doivent retourner `HTTP/1.1 200 OK` dans la première ligne de la réponse.
+
+![alt text](../images/verifPort.png)
 
 ---
 
