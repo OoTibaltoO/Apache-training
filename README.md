@@ -4,7 +4,7 @@ Ce guide t'explique comment installer, configurer et gérer Apache sur Ubuntu.
 
 ---
 
-## Table des matières
+## Minimum fonctionnel
 
 1. [C'est quoi Apache ?](docs/presentation.md)
 2. [Installation d'Apache](docs/installation.md)
@@ -14,5 +14,27 @@ Ce guide t'explique comment installer, configurer et gérer Apache sur Ubuntu.
 6. [Configurer un serveur de base](docs/configuration-serveur.md)
 7. [Liens symboliques et liens physiques](docs/liens.md)
 8. [Permissions](docs/permissions.md)
-9. [Désinstaller Apache](docs/desinstallation.md)
-10. [Récap rapide](docs/recap.md)
+
+---
+
+## Aller plus loin
+
+### Site statique (HTML/CSS)
+
+- Modifier `/etc/hosts` pour accéder via `monsite.local` au lieu de `localhost:8080`
+
+### Sécuriser le serveur
+
+- Configurer HTTPS avec un certificat SSL (`mod_ssl` est déjà activé)
+
+### Site dynamique
+
+- Installer et configurer PHP avec Apache (`mod_php` ou `php-fpm`)
+- Installer une base de données (MySQL ou MariaDB)
+
+---
+
+## Référence
+
+1. [Désinstaller Apache](docs/desinstallation.md)
+2. [Récap rapide](docs/recap.md)
