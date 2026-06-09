@@ -66,6 +66,8 @@ http://localhost
 
 Tu devrais voir la page par défaut d'Apache avec le message **"It works!"** (ou "Apache2 Ubuntu Default Page").
 
+![alt text](<it works.png>)
+
 Si tu vois cette page, Apache fonctionne correctement.
 
 ---
