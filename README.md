@@ -124,6 +124,14 @@ sudo cp ~/index.html /var/www/html/index.html
 > `cp` = copie un fichier
 > `~/` = ton dossier personnel (ex. `/home/ton-user/`)
 
+Pour copier la page Apache dans le dossier de projet courant (pour la garder en référence) :
+
+```bash
+cp /var/www/html/index.html .
+```
+
+> `.` = répertoire courant (là où tu te trouves dans le terminal)
+
 **Option 3 — Remplacer entièrement avec une commande rapide :**
 
 ```bash
@@ -140,7 +148,23 @@ Recharge `http://localhost` dans le navigateur — ta page s'affiche immédiatem
 
 ---
 
-## 8. Désinstaller Apache (si besoin)
+## 8. Trouver le fichier index.html
+
+Pour localiser le fichier `index.html` d'Apache sur le système :
+
+```bash
+find /var/www/html -name "index.html"
+```
+
+> `find` = outil de recherche de fichiers
+> `/var/www/html` = répertoire de départ (racine web Apache)
+> `-name "index.html"` = filtre par nom de fichier
+
+Le fichier se trouve à `/var/www/html/index.html`.
+
+---
+
+## 9. Désinstaller Apache (si besoin)
 
 ```bash
 sudo apt remove apache2 -y
